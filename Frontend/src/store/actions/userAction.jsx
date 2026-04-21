@@ -3,7 +3,7 @@ import { loaduser, removeuser } from "../../reducers/userSlice";
 
 export const asynclogoutuser = () => async (dispatch, getState) => {
   try {
-    localStorage.removeItem("user");
+    localStorage.removeItem("/api/auth/logout");
     dispatch(removeuser());
     
   } catch (error) {
@@ -23,7 +23,7 @@ export const asynccurrentuser = () => async (dispatch, getState) => {
 
 export const asyncLoginUser = (user) => async (dispatch) => {
   try {
-    const res = await axios.get("/users");
+    const res = await axios.get("/api/auth/login");
 
     const foundUser = res.data.find(
       (u) =>
@@ -44,7 +44,7 @@ export const asyncLoginUser = (user) => async (dispatch) => {
 
 export const asyncregisteruser = (user) => async (dispatch, getState) => {
   try {
-    const res = await axios.post("/users", user);
+    const res = await axios.post("/api/auth/register", user);
     
   } catch (error) {
     console.log(error);
