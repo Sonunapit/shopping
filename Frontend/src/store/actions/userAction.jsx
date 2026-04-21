@@ -22,7 +22,11 @@ export const asynccurrentuser = () => async (dispatch, getState) => {
 
 export const asyncLoginUser = (user) => async (dispatch) => {
   try {
+
     const res = await axios.post("/api/auth/login", user);
+
+    const res = await axios.post("/api/auth/login",user);
+
 
     dispatch(loaduser(res.data.user));
     localStorage.setItem("user", JSON.stringify(res.data.user));
