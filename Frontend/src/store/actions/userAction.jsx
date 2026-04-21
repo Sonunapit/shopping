@@ -23,7 +23,7 @@ export const asynccurrentuser = () => async (dispatch, getState) => {
 
 export const asyncLoginUser = (user) => async (dispatch) => {
   try {
-    const res = await axios.post("/api/auth/login");
+    const res = await axios.post("/api/auth/login",user);
 
     const foundUser = res.data.find(
       (u) =>
