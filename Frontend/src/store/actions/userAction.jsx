@@ -3,9 +3,9 @@ import { loaduser, removeuser } from "../../reducers/userSlice";
 
 export const asynclogoutuser = () => async (dispatch, getState) => {
   try {
-    localStorage.removeItem("/api/auth/logout");
+    await axios.get("/api/auth/logout");
+    localStorage.removeItem("user");
     dispatch(removeuser());
-    
   } catch (error) {
     console.log(error);
   }
@@ -15,7 +15,6 @@ export const asynccurrentuser = () => async (dispatch, getState) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) dispatch(loaduser(user));
-  
   } catch (error) {
     console.log(error);
   }
@@ -23,20 +22,10 @@ export const asynccurrentuser = () => async (dispatch, getState) => {
 
 export const asyncLoginUser = (user) => async (dispatch) => {
   try {
-    const res = await axios.get("/api/auth/login");
+    const res = await axios.post("/api/auth/login", user);
 
-    const foundUser = res.data.find(
-      (u) =>
-        u.email === user.email.trim() && u.password === user.password.trim(),
-    );
-
-    if (foundUser) {
-      dispatch(loaduser(foundUser)); 
-      localStorage.setItem("user", JSON.stringify(foundUser)); 
-      
-    } else {
-      alert("Invalid email or password");
-    }
+    dispatch(loaduser(res.data.user));
+    localStorage.setItem("user", JSON.stringify(res.data.user));
   } catch (error) {
     console.log(error);
   }
@@ -45,19 +34,17 @@ export const asyncLoginUser = (user) => async (dispatch) => {
 export const asyncregisteruser = (user) => async (dispatch, getState) => {
   try {
     const res = await axios.post("/api/auth/register", user);
-    
   } catch (error) {
     console.log(error);
   }
 };
 
-export const asyncupdateuser = (id,user) => async (dispatch, getState) => {
+export const asyncupdateuser = (id, user) => async (dispatch, getState) => {
   try {
-    const {data} = await axios.patch("/users/" +id  , user);
-    localStorage.setItem("user", JSON.stringify(data))
+    const { data } = await axios.patch("/users/" + id, user);
+    localStorage.setItem("user", JSON.stringify(data));
 
-    dispatch(asynccurrentuser(user))
-    
+    dispatch(asynccurrentuser(user));
   } catch (error) {
     console.log(error);
   }
@@ -65,10 +52,10 @@ export const asyncupdateuser = (id,user) => async (dispatch, getState) => {
 
 export const asyncdeleteuser = (id) => async (dispatch, getState) => {
   try {
-    await axios.delete("/users/" +id)
-    dispatch(asynclogoutuser())
-    c
+    await axios.delete("/users/" + id);
+    dispatch(asynclogoutuser());
+    c;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-} 
+};
