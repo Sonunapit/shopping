@@ -1,12 +1,18 @@
-const exprees = require('express')
+const express = require('express')
 const cookieParser = require('cookie-parser')
+const cors = require('cors')
 
+const app = express()
 
+app.use(cors({
+  origin: "https://shopping-ubwg.onrender.com",
+  credentials: true
+}))
 
-const app = exprees()
-app.use(exprees.json())
+app.use(express.json())
 app.use(cookieParser())
 
 const authRoutes = require('./routes/auth.routes')
-app.use('/api/auth',authRoutes)
+app.use('/api/auth', authRoutes)
+
 module.exports = app
