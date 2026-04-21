@@ -25,7 +25,7 @@ export const asyncLoginUser = (user) => async (dispatch) => {
 
     const res = await axios.post("/api/auth/login", user);
 
-    const res = await axios.post("/api/auth/login",user);
+    
 
 
     dispatch(loaduser(res.data.user));
