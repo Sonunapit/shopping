@@ -5,7 +5,7 @@ const cors = require('cors')
 const app = express()
 
 app.use(cors({
-  origin: "https://frontend01-i8u5.onrender.com",
+  origin: "https://shoppingapp-csfr.onrender.com",
   credentials: true
 }))
 
