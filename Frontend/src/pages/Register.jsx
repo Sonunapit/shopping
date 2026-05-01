@@ -1,131 +1,121 @@
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { asyncregisteruser } from "../store/actions/userAction";
-import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
-import React, { useState } from "react";
-import { User, Mail, Lock, Eye, EyeOff, UserPlus } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { asyncupdateuser } from "../store/actions/userAction";
+import { useEffect, useState } from "react";
+import axios from "../api/axioconfig";
+import InfiniteScroll from "react-infinite-scroll-component";
 
-const Register = () => {
-  const { register, reset, handleSubmit } = useForm();
-
+const Products = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
+  const users = useSelector((state) => state.userReducer.users);
+  //const products = useSelector((state)=> state.productReducer.products)
 
-  // ✅ FIXED HANDLER
-  const RegisterHandler = async (user) => {
-    const [firstName, lastName] = user.username.split(" ");
+  const [products, setproducts] = useState([]);
+  const [hasMore, sethasMore] = useState(true);
+  const [page, setPage] = useState(1);
 
-    const newUser = {
-      username: user.username,
-      email: user.email,
-      password: user.password,
-      fullName: {
-        firstName: firstName || user.username,
-        lastName: lastName || "User",
-      },
-    };
-
+  const fetchproducts = async () => {
     try {
-      await dispatch(asyncregisteruser(newUser));
-      toast.success("User Registered Successfully!");
-      navigate("/login");
-      reset();
+      const res = await axios.get(`/products?_page=${page}&_per_page=6`);
+
+      const newProducts = res.data.data;
+
+      
+
+      if (newProducts.length > 0) {
+        setproducts((prev) => [...prev, ...newProducts]);
+        setPage((prev) => prev + 1);
+      } else {
+        sethasMore(true);
+      }
     } catch (error) {
-      toast.error("Registration Failed");
+      console.log(error);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full sm:max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300">
-        <div className="h-2 bg-gray-900 w-full"></div>
+  useEffect(() => {
+    fetchproducts();
+  }, []);
 
-        <div className="p-6 sm:p-8">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
-              Create Account
-            </h2>
-            <p className="text-gray-400 text-sm mt-1">
-              Join our community today
-            </p>
-          </div>
+  const AddtoCardHandler = (product) => {
+    const copyuser = { ...users, cart: [...(users.cart || [])] };
 
-          <form onSubmit={handleSubmit(RegisterHandler)}>
-            {/* Name */}
-            <div className="mb-6">
-              <label className="text-xs text-gray-400 font-bold block mb-1">
-                Full Name
-              </label>
-              <div className="flex items-center border-b-2 py-2">
-                <User className="mr-2" size={18} />
-                <input
-                  {...register("username")}
-                  className="w-full outline-none"
-                  type="text"
-                  placeholder="Enter your name"
-                  required
-                />
-              </div>
-            </div>
+    const x = copyuser.cart.findIndex((c) => c?.product?.id == product.id);
 
-            {/* Email */}
-            <div className="mb-6">
-              <label className="text-xs text-gray-400 font-bold block mb-1">
-                Email
-              </label>
-              <div className="flex items-center border-b-2 py-2">
-                <Mail className="mr-2" size={18} />
-                <input
-                  {...register("email")}
-                  className="w-full outline-none"
-                  type="email"
-                  required
-                />
-              </div>
-            </div>
+    if (x == -1) {
+      copyuser.cart.push({ product, quantity: 1 });
+    } else {
+      copyuser.cart[x] = {
+        product,
+        quantity: copyuser.cart[x].quantity + 1,
+      };
+    }
 
-            {/* Password */}
-            <div className="mb-6">
-              <label className="text-xs text-gray-400 font-bold block mb-1">
-                Password
-              </label>
-              <div className="flex items-center border-b-2 py-2 relative">
-                <Lock className="mr-2" size={18} />
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  className="w-full outline-none"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+    dispatch(asyncupdateuser(copyuser.id, copyuser));
+  };
 
-            {/* Submit */}
-            <button className="w-full bg-black text-white py-3 rounded-lg">
-              <UserPlus size={16} className="inline mr-2" />
-              Register
-            </button>
+  const rederproduct = products.map((product) => {
+    return (
+      <div
+        className="w-full p-1 gap-2  border shadow rounded-lg bg-white "
+        key={product.id}
+      >
+        <img
+          className="w-full aspect-video  object-cover rounded-t-sm"
+          src={product.image}
+          alt=""
+        />
+        <div className="mt-2 px-1">
+          <h1 className="font-semibold md:font-semibold tetxt-lg text-gray-800 line-clamp-1 ">
+            {product.title}
+          </h1>
+          <small className="font-semibold text-gray-500 black ">
+            {product.description.slice(0, 100)}
+          </small>
+          <p className="text-2xl font-black mt-2 text-gray-900">
+            ₹{product.price}
+          </p>
+        </div>
 
-            <div className="text-center mt-6">
-              <p className="text-sm">Already have an account?</p>
-              <a href="/login" className="text-blue-600 font-bold">
-                Login
-              </a>
-            </div>
-          </form>
+        <div className="p-3 mt-3 flex justify-between items-center gap-2">
+          <Link
+            className="px-2 py-2 bg-green-700 rounded text-white  text-sm flex items-center gap-1 hover:bg-green-800 transition-colors flex-1 justify-center"
+            to={`/product/${product.id}`}
+          >
+            More Info
+          </Link>
+
+          <button
+            className="px-2 py-2 bg-gray-700 rounded text-white text-sm flex items-center gap-1 hover:bg-gray-800 transition-colors flex-1 justify-center"
+            onClick={() => AddtoCardHandler(product.id)}
+          >
+            Add to Card
+          </button>
         </div>
       </div>
+    );
+  });
+
+  return products.length > 0 ? (
+    <div className=" ">
+      <InfiniteScroll
+        className=" flex flex-col gap-2 w-full overflow-hidden md:grid grid-cols-3  "
+        dataLength={products.length}
+        next={fetchproducts}
+        loader={<h4>Loading...</h4>}
+        hasMore={hasMore}
+        endMessage={
+          <p style={{ textAlign: "center" }}>
+            <b>Yay! You have seen it all</b>
+          </p>
+        }
+      >
+        {rederproduct}
+      </InfiniteScroll>
     </div>
+  ) : (
+    "loading.."
   );
 };
 
-export default Register;
+export default Products;
