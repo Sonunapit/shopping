@@ -37,9 +37,16 @@ export const asyncLoginUser = (user) => async (dispatch) => {
 
 export const asyncregisteruser = (user) => async (dispatch, getState) => {
   try {
-    const res = await axios.post("/api/auth/register", user);
+    console.log("SENDING USER:", user); // 👈 ADD THIS
+
+    const res = await axios.post(
+      "http://localhost:3000/api/auth/register",
+      user
+    );
+
+    console.log("RESPONSE:", res.data);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR:", error.response?.data || error.message);
   }
 };
 
